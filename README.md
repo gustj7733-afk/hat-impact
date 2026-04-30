@@ -1,4 +1,3 @@
-# hat-impact[index.html](https://github.com/user-attachments/files/27234586/index.html)
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -214,16 +213,12 @@
 </div>
 
 <script>
-var SCRIPT_URL = localStorage.getItem('hat_script_url') || '';
+var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzCcKVN2VvJzgWD7fQJoVKxtzEp8ZUoz82PbyvylhJxVAMmjx4lfdr-9zGvJQ_0Fy0CZg/exec';
 var allRecords = [];
 
 // ── 초기화 ──
 window.onload = function() {
-  if (!SCRIPT_URL) {
-    document.getElementById('setupOverlay').style.display = 'flex';
-  } else {
-    init();
-  }
+  init();
 };
 
 function saveUrl() {
