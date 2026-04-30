@@ -16,16 +16,17 @@
   .page{display:none;padding:16px;max-width:680px;margin:0 auto}
   .page.active{display:block}
   .card{background:#fff;border-radius:12px;padding:18px 16px;box-shadow:0 1px 6px rgba(0,0,0,.07);margin-bottom:14px}
-  .card-title{font-size:14px;font-weight:800;margin-bottom:14px}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .span2{grid-column:1/-1}
   label{display:block;font-size:11px;font-weight:700;color:#6b7280;margin-bottom:5px}
   input,select,textarea{width:100%;padding:9px 11px;border:1px solid #e5e7eb;border-radius:7px;font-size:13px;outline:none;background:#fff;font-family:inherit}
   textarea{height:72px;resize:vertical}
-  .btn{width:100%;padding:13px;font-size:14px;font-weight:800;border:none;border-radius:8px;cursor:pointer;margin-top:14px}
-  .btn-primary{background:#4a7c59;color:#fff}
+  .btn{width:100%;padding:12px;font-size:14px;font-weight:800;border:none;border-radius:8px;cursor:pointer}
+  .btn-primary{background:#4a7c59;color:#fff;margin-top:14px}
+  .btn-cancel{background:#f3f4f6;color:#6b7280;margin-top:8px;font-size:13px}
   .btn-outline{background:#f0fdf4;border:1px solid #4a7c59;color:#4a7c59;font-weight:700;font-size:13px}
   .info-box{background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:11px 14px;font-size:12px;color:#92400e;line-height:1.8;margin-top:12px}
+  .edit-banner{background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;padding:10px 14px;font-size:13px;color:#92400e;font-weight:700;margin-bottom:14px;display:none}
   .toast{position:fixed;top:12px;left:50%;transform:translateX(-50%);padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;color:#fff;z-index:999;display:none;white-space:nowrap;box-shadow:0 4px 14px rgba(0,0,0,.18)}
   .total-bar{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px}
   .total-box{background:#fff;border-radius:9px;padding:12px 8px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.06)}
@@ -40,6 +41,9 @@
   .rec-date{font-size:13px;font-weight:700}
   .rec-detail{font-size:12px;color:#6b7280;margin-top:4px;line-height:1.6}
   .rec-note{font-size:12px;color:#4b5563;margin-top:7px;padding:7px 10px;background:#f9fafb;border-radius:6px;border-left:3px solid #4a7c59}
+  .rec-actions{display:flex;gap:6px;margin-top:10px}
+  .btn-edit{font-size:11px;padding:5px 12px;background:#f3f4f6;border:none;border-radius:5px;cursor:pointer;color:#374151;font-weight:600}
+  .btn-del{font-size:11px;padding:5px 12px;background:#fef2f2;border:none;border-radius:5px;cursor:pointer;color:#dc2626;font-weight:600}
   .kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
   .kpi{background:#fff;border-radius:12px;padding:16px 14px;box-shadow:0 1px 6px rgba(0,0,0,.07)}
   .kpi-lbl{font-size:10px;color:#9ca3af;font-weight:700}
@@ -52,6 +56,7 @@
   .calc-box{background:#f0fdf4;border-radius:7px;padding:8px 12px;font-size:13px;color:#4a7c59;font-weight:700;margin-top:12px;display:none}
   .empty{text-align:center;color:#9ca3af;padding:40px;font-size:14px}
   .loading{text-align:center;color:#9ca3af;padding:24px;font-size:13px}
+  .mb8{margin-bottom:8px}
 </style>
 </head>
 <body>
@@ -64,23 +69,21 @@
 </div>
 
 <div class="tabs">
-  <button class="tab active" onclick="switchTab('input',this)">➕ 기록 입력</button>
+  <button class="tab active" id="tab-input" onclick="switchTab('input',this)">➕ 기록 입력</button>
   <button class="tab" onclick="switchTab('records',this)">📋 전체 기록</button>
   <button class="tab" onclick="switchTab('dashboard',this)">📊 임팩트 현황</button>
 </div>
 
 <!-- 입력 탭 -->
 <div class="page active" id="page-input">
+  <div class="edit-banner" id="editBanner">✏️ 수정 모드 — 내용을 변경한 후 저장하세요.</div>
   <div class="card">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
-      <div class="card-title" style="margin-bottom:0">새 세션 기록</div>
+      <div style="font-size:14px;font-weight:800" id="formTitle">새 세션 기록</div>
       <span class="tag tag-green" style="font-size:12px">H.A.T.</span>
     </div>
     <div class="grid2">
-      <div>
-        <label>날짜 *</label>
-        <input type="date" id="f-date" min="2003-01-01">
-      </div>
+      <div><label>날짜 *</label><input type="date" id="f-date" min="2003-01-01"></div>
       <div>
         <label>주진행 강사 *</label>
         <select id="f-instructor">
@@ -101,26 +104,11 @@
         </select>
         <input type="text" id="f-target-custom" placeholder="대상 직접 입력" style="display:none;margin-top:8px">
       </div>
-      <div>
-        <label>회기 수 *</label>
-        <input type="number" id="f-sessionNo" min="1" placeholder="1" oninput="calcTotal()">
-      </div>
-      <div>
-        <label>1회기 시간(분) *</label>
-        <input type="number" id="f-sessionMin" min="30" step="30" value="90" oninput="calcTotal()">
-      </div>
-      <div>
-        <label>참여 인원(명) *</label>
-        <input type="number" id="f-participants" min="1" placeholder="0">
-      </div>
-      <div>
-        <label>장소</label>
-        <input type="text" id="f-location" placeholder="운영 장소">
-      </div>
-      <div class="span2">
-        <label>보조강사 (기록용, 집계 제외)</label>
-        <input type="text" id="f-assistant" placeholder="없으면 공백">
-      </div>
+      <div><label>회기 수 *</label><input type="number" id="f-sessionNo" min="1" placeholder="1" oninput="calcTotal()"></div>
+      <div><label>1회기 시간(분) *</label><input type="number" id="f-sessionMin" min="30" step="30" value="90" oninput="calcTotal()"></div>
+      <div><label>참여 인원(명) *</label><input type="number" id="f-participants" min="1" placeholder="0"></div>
+      <div><label>장소</label><input type="text" id="f-location" placeholder="운영 장소"></div>
+      <div class="span2"><label>보조강사 (기록용, 집계 제외)</label><input type="text" id="f-assistant" placeholder="없으면 공백"></div>
       <div class="span2">
         <label>임팩트 소감 (선택)</label>
         <textarea id="f-notes" placeholder="성과 기록용 — 참여자의 특별한 반응이나 소감이 있다면 자유롭게 기술해 주세요."></textarea>
@@ -128,6 +116,7 @@
     </div>
     <div class="calc-box" id="calcBox"></div>
     <button class="btn btn-primary" id="submitBtn" onclick="submitRecord()">기록 저장 + 구글 시트 전송</button>
+    <button class="btn btn-cancel" id="cancelBtn" onclick="cancelEdit()" style="display:none">취소</button>
   </div>
   <div class="info-box">
     💡 <b>중복 카운팅 방지:</b> 주진행 강사만 기록합니다. 보조강사는 참고용, 집계 제외.<br>
@@ -156,7 +145,7 @@
     <div class="total-box"><div class="total-val" id="t-hours">-</div><div class="total-lbl">총 시간</div></div>
     <div class="total-box"><div class="total-val" id="t-ppl">-</div><div class="total-lbl">총 인원</div></div>
   </div>
-  <button class="btn btn-outline" onclick="loadRecords()" style="margin-bottom:10px;margin-top:0">🔄 새로고침</button>
+  <button class="btn btn-outline mb8" onclick="loadRecords()" style="margin-top:0">🔄 새로고침</button>
   <button class="btn btn-outline" onclick="exportCSV()" style="margin-bottom:14px;margin-top:4px">📥 CSV 내보내기</button>
   <div id="recordList"><div class="loading">🔄 구글 시트에서 불러오는 중...</div></div>
 </div>
@@ -179,16 +168,15 @@
     <div class="kpi"><div class="kpi-lbl">누적 운영 시간</div><div class="kpi-val" id="k-hours">-<span class="kpi-unit">시간</span></div></div>
   </div>
   <div class="card">
-    <div class="card-title">대상별 임팩트 현황</div>
+    <div style="font-size:14px;font-weight:800;margin-bottom:14px">대상별 임팩트 현황</div>
     <div id="targetChart"><div class="loading">불러오는 중...</div></div>
   </div>
 </div>
 
 <script>
-// ★ Apps Script URL이 여기 고정되어 있습니다
 var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzCcKVN2VvJzgWD7fQJoVKxtzEp8ZUoz82PbyvylhJxVAMmjx4lfdr-9zGvJQ_0Fy0CZg/exec';
-
 var allRecords = [];
+var editingId = null;
 
 window.onload = function() { loadRecords(); };
 
@@ -199,13 +187,11 @@ function loadRecords() {
     .then(function(data) {
       if (Array.isArray(data)) {
         allRecords = data.sort(function(a,b){ return new Date(b.date)-new Date(a.date); });
-        updateYearFilters();
-        updateTargetFilter();
-        renderRecords();
-        renderDashboard();
+        updateYearFilters(); updateTargetFilter();
+        renderRecords(); renderDashboard();
       }
     })
-    .catch(function(){ showToast('데이터 불러오기 실패. 잠시 후 다시 시도해주세요.', true); });
+    .catch(function(){ showToast('데이터 불러오기 실패.', true); });
 }
 
 function switchTab(name, el) {
@@ -219,15 +205,13 @@ function calcTotal() {
   var n = +document.getElementById('f-sessionNo').value;
   var m = +document.getElementById('f-sessionMin').value;
   var box = document.getElementById('calcBox');
-  if (n && m) {
-    box.style.display = 'block';
-    box.textContent = '✓ 총 운영시간: '+(n*m)+'분 ('+(n*m/60).toFixed(1)+'시간)';
-  } else { box.style.display = 'none'; }
+  if (n && m) { box.style.display='block'; box.textContent='✓ 총 운영시간: '+(n*m)+'분 ('+(n*m/60).toFixed(1)+'시간)'; }
+  else { box.style.display='none'; }
 }
 
 function toggleCustomTarget() {
-  var sel = document.getElementById('f-target');
-  document.getElementById('f-target-custom').style.display = sel.value==='__custom__' ? 'block' : 'none';
+  document.getElementById('f-target-custom').style.display =
+    document.getElementById('f-target').value === '__custom__' ? 'block' : 'none';
 }
 
 function submitRecord() {
@@ -239,11 +223,9 @@ function submitRecord() {
   var sessionNo = +document.getElementById('f-sessionNo').value;
   var sessionMin = +document.getElementById('f-sessionMin').value;
   var participants = +document.getElementById('f-participants').value;
-
   if (!date||!instructor||!target||!sessionNo||!participants) {
     showToast('필수 항목(*)을 모두 입력해주세요.', true); return;
   }
-
   var entry = {
     date:date, instructor:instructor, program:'H.A.T.', target:target,
     sessionNo:sessionNo, sessionMin:sessionMin, totalMin:sessionNo*sessionMin,
@@ -252,22 +234,86 @@ function submitRecord() {
     assistant:document.getElementById('f-assistant').value,
     notes:document.getElementById('f-notes').value
   };
-
   var btn = document.getElementById('submitBtn');
   btn.textContent='저장 중...'; btn.disabled=true;
 
-  fetch(SCRIPT_URL+'?data='+encodeURIComponent(JSON.stringify(entry)), {mode:'no-cors'})
+  if (editingId) {
+    // 수정
+    fetch(SCRIPT_URL+'?action=update&id='+editingId+'&data='+encodeURIComponent(JSON.stringify(entry)), {mode:'no-cors'})
+      .then(function() {
+        entry.id = editingId;
+        var idx = allRecords.findIndex(function(r){ return r.id===editingId; });
+        if (idx > -1) allRecords[idx] = entry;
+        cancelEdit();
+        renderRecords(); renderDashboard();
+        showToast('수정되었습니다. ✓');
+        btn.textContent='기록 저장 + 구글 시트 전송'; btn.disabled=false;
+      })
+      .catch(function(){ showToast('수정 실패.', true); btn.textContent='기록 저장 + 구글 시트 전송'; btn.disabled=false; });
+  } else {
+    // 새 기록
+    fetch(SCRIPT_URL+'?data='+encodeURIComponent(JSON.stringify(entry)), {mode:'no-cors'})
+      .then(function() {
+        entry.id = String(Date.now());
+        allRecords.unshift(entry);
+        updateYearFilters(); updateTargetFilter();
+        resetForm();
+        showToast('저장되었습니다. 구글 시트에 전송됨 ✓');
+        btn.textContent='기록 저장 + 구글 시트 전송'; btn.disabled=false;
+      })
+      .catch(function(){ showToast('전송 실패.', true); btn.textContent='기록 저장 + 구글 시트 전송'; btn.disabled=false; });
+  }
+}
+
+function startEdit(id) {
+  var r = allRecords.find(function(x){ return x.id===id; });
+  if (!r) return;
+  editingId = id;
+  document.getElementById('f-date').value = r.date||'';
+  document.getElementById('f-instructor').value = r.instructor||'';
+  var knownTargets = ['소방공무원','전문자원봉사자','시니어','성착취피해 여성청소년','성매매·성폭력피해 여성'];
+  if (knownTargets.indexOf(r.target) > -1) {
+    document.getElementById('f-target').value = r.target;
+    document.getElementById('f-target-custom').style.display='none';
+  } else {
+    document.getElementById('f-target').value = '__custom__';
+    document.getElementById('f-target-custom').value = r.target||'';
+    document.getElementById('f-target-custom').style.display='block';
+  }
+  document.getElementById('f-sessionNo').value = r.sessionNo||'';
+  document.getElementById('f-sessionMin').value = r.sessionMin||90;
+  document.getElementById('f-participants').value = r.participants||'';
+  document.getElementById('f-location').value = r.location||'';
+  document.getElementById('f-assistant').value = r.assistant||'';
+  document.getElementById('f-notes').value = r.notes||'';
+  calcTotal();
+  document.getElementById('formTitle').textContent = '기록 수정';
+  document.getElementById('editBanner').style.display = 'block';
+  document.getElementById('submitBtn').textContent = '수정 완료 + 구글 시트 반영';
+  document.getElementById('cancelBtn').style.display = 'block';
+  switchTab('input', document.getElementById('tab-input'));
+  window.scrollTo(0,0);
+}
+
+function cancelEdit() {
+  editingId = null;
+  resetForm();
+  document.getElementById('formTitle').textContent = '새 세션 기록';
+  document.getElementById('editBanner').style.display = 'none';
+  document.getElementById('submitBtn').textContent = '기록 저장 + 구글 시트 전송';
+  document.getElementById('cancelBtn').style.display = 'none';
+}
+
+function deleteRecord(id) {
+  if (!confirm('이 기록을 삭제할까요?')) return;
+  fetch(SCRIPT_URL+'?action=delete&id='+id, {mode:'no-cors'})
     .then(function() {
-      allRecords.unshift(entry);
+      allRecords = allRecords.filter(function(r){ return r.id!==id; });
       updateYearFilters(); updateTargetFilter();
-      resetForm();
-      showToast('저장되었습니다. 구글 시트에 전송됨 ✓');
-      btn.textContent='기록 저장 + 구글 시트 전송'; btn.disabled=false;
+      renderRecords(); renderDashboard();
+      showToast('삭제되었습니다.');
     })
-    .catch(function() {
-      showToast('전송 실패. 네트워크를 확인해주세요.', true);
-      btn.textContent='기록 저장 + 구글 시트 전송'; btn.disabled=false;
-    });
+    .catch(function(){ showToast('삭제 실패.', true); });
 }
 
 function resetForm() {
@@ -285,8 +331,7 @@ function resetForm() {
 function updateYearFilters() {
   var years=[...new Set(allRecords.map(function(r){return (r.date||'').slice(0,4);}))].filter(Boolean).sort().reverse();
   ['fy','dy'].forEach(function(id){
-    var sel=document.getElementById(id);
-    var cur=sel.value;
+    var sel=document.getElementById(id),cur=sel.value;
     sel.innerHTML='<option value="">'+(id==='dy'?'전체 연도 (2003~)':'전체 연도')+'</option>';
     years.forEach(function(y){sel.innerHTML+='<option value="'+y+'">'+y+'년</option>';});
     sel.value=cur;
@@ -295,18 +340,15 @@ function updateYearFilters() {
 
 function updateTargetFilter() {
   var targets=[...new Set(allRecords.map(function(r){return r.target;}))].filter(Boolean);
-  var sel=document.getElementById('ft');
-  var cur=sel.value;
+  var sel=document.getElementById('ft'),cur=sel.value;
   sel.innerHTML='<option value="">전체 대상</option>';
   targets.forEach(function(t){sel.innerHTML+='<option value="'+esc(t)+'">'+esc(t)+'</option>';});
   sel.value=cur;
 }
 
 function getFiltered(yId,mId,iId,tId) {
-  var fy=document.getElementById(yId).value;
-  var fm=document.getElementById(mId).value;
-  var fi=iId?document.getElementById(iId).value:'';
-  var ft=tId?document.getElementById(tId).value:'';
+  var fy=document.getElementById(yId).value, fm=document.getElementById(mId).value;
+  var fi=iId?document.getElementById(iId).value:'', ft=tId?document.getElementById(tId).value:'';
   return allRecords.filter(function(r){
     if(fy&&(r.date||'').slice(0,4)!==fy)return false;
     if(fm&&(r.date||'').slice(5,7)!==fm)return false;
@@ -317,19 +359,16 @@ function getFiltered(yId,mId,iId,tId) {
 }
 
 function renderRecords() {
-  var filtered=getFiltered('fy','fm','fi','ft');
-  var sessions=filtered.reduce(function(a,r){return a+(+r.sessionNo||0);},0);
-  var mins=filtered.reduce(function(a,r){return a+(+r.totalMin||0);},0);
-  var ppl=filtered.reduce(function(a,r){return a+(+r.participants||0);},0);
+  var f=getFiltered('fy','fm','fi','ft');
+  var sessions=f.reduce(function(a,r){return a+(+r.sessionNo||0);},0);
+  var mins=f.reduce(function(a,r){return a+(+r.totalMin||0);},0);
+  var ppl=f.reduce(function(a,r){return a+(+r.participants||0);},0);
   document.getElementById('t-sessions').textContent=sessions.toLocaleString()+'회기';
   document.getElementById('t-hours').textContent=Math.round(mins/60).toLocaleString()+'시간';
   document.getElementById('t-ppl').textContent=ppl.toLocaleString()+'명';
-
-  if(filtered.length===0){
-    document.getElementById('recordList').innerHTML='<div class="empty">기록이 없습니다.</div>'; return;
-  }
+  if(!f.length){document.getElementById('recordList').innerHTML='<div class="empty">기록이 없습니다.</div>';return;}
   var html='';
-  filtered.forEach(function(r){
+  f.forEach(function(r){
     html+='<div class="record-item">';
     html+='<span class="tag tag-green">'+esc(r.instructor)+'</span>';
     html+='<span class="tag tag-purple">'+esc(r.target)+'</span>';
@@ -340,57 +379,54 @@ function renderRecords() {
     if(r.assistant)html+=' <span style="color:#9ca3af">· 보조: '+esc(r.assistant)+'</span>';
     html+='</div>';
     if(r.notes)html+='<div class="rec-note">💬 '+esc(r.notes)+'</div>';
-    html+='</div>';
+    html+='<div class="rec-actions">';
+    html+='<button class="btn-edit" onclick="startEdit(\''+r.id+'\')">✏️ 수정</button>';
+    html+='<button class="btn-del" onclick="deleteRecord(\''+r.id+'\')">🗑 삭제</button>';
+    html+='</div></div>';
   });
   document.getElementById('recordList').innerHTML=html;
 }
 
 function renderDashboard() {
-  var filtered=getFiltered('dy','dm','','');
-  var sessions=filtered.reduce(function(a,r){return a+(+r.sessionNo||0);},0);
-  var mins=filtered.reduce(function(a,r){return a+(+r.totalMin||0);},0);
-  var ppl=filtered.reduce(function(a,r){return a+(+r.participants||0);},0);
-  document.getElementById('k-count').innerHTML=filtered.length+'<span class="kpi-unit">건</span>';
+  var f=getFiltered('dy','dm','','');
+  var sessions=f.reduce(function(a,r){return a+(+r.sessionNo||0);},0);
+  var mins=f.reduce(function(a,r){return a+(+r.totalMin||0);},0);
+  var ppl=f.reduce(function(a,r){return a+(+r.participants||0);},0);
+  document.getElementById('k-count').innerHTML=f.length.toLocaleString()+'<span class="kpi-unit">건</span>';
   document.getElementById('k-sessions').innerHTML=sessions.toLocaleString()+'<span class="kpi-unit">회기</span>';
   document.getElementById('k-ppl').innerHTML=ppl.toLocaleString()+'<span class="kpi-unit">명</span>';
   document.getElementById('k-hours').innerHTML=Math.round(mins/60).toLocaleString()+'<span class="kpi-unit">시간</span>';
-
   var byTarget={};
-  filtered.forEach(function(r){
+  f.forEach(function(r){
     if(!byTarget[r.target])byTarget[r.target]={s:0,p:0};
-    byTarget[r.target].s+=(+r.sessionNo||0);
-    byTarget[r.target].p+=(+r.participants||0);
+    byTarget[r.target].s+=(+r.sessionNo||0); byTarget[r.target].p+=(+r.participants||0);
   });
   var sorted=Object.entries(byTarget).sort(function(a,b){return b[1].p-a[1].p;});
-  if(sorted.length===0){document.getElementById('targetChart').innerHTML='<div class="empty">데이터가 없습니다.</div>';return;}
+  if(!sorted.length){document.getElementById('targetChart').innerHTML='<div class="empty">데이터가 없습니다.</div>';return;}
   var html='';
-  sorted.forEach(function(entry){
-    var t=entry[0],d=entry[1];
-    var pct=ppl>0?Math.round(d.p/ppl*100):0;
-    html+='<div class="bar-row"><div class="bar-top"><span style="font-weight:700;color:#374151">'+esc(t)+'</span><span style="color:#6b7280">'+d.s+'회기 · <b>'+d.p+'명</b> ('+pct+'%)</span></div><div class="bar-bg"><div class="bar-fill" style="width:'+pct+'%"></div></div></div>';
+  sorted.forEach(function(e){
+    var t=e[0],d=e[1],pct=ppl>0?Math.round(d.p/ppl*100):0;
+    html+='<div class="bar-row"><div class="bar-top"><span style="font-weight:700;color:#374151">'+esc(t)+'</span><span style="color:#6b7280">'+d.s.toLocaleString()+'회기 · <b>'+d.p.toLocaleString()+'명</b> ('+pct+'%)</span></div><div class="bar-bg"><div class="bar-fill" style="width:'+pct+'%"></div></div></div>';
   });
   document.getElementById('targetChart').innerHTML=html;
 }
 
 function exportCSV() {
-  var header=['날짜','주진행강사','프로그램명','대상','회기수','1회기(분)','총시간(분)','참여인원','장소','보조강사','임팩트소감'];
+  var h=['날짜','주진행강사','프로그램명','대상','회기수','1회기(분)','총시간(분)','참여인원','장소','보조강사','임팩트소감'];
   var rows=allRecords.map(function(r){
     return [r.date,r.instructor,r.program||'H.A.T.',r.target,r.sessionNo,r.sessionMin,r.totalMin,r.participants,r.location||'',r.assistant||'',r.notes||'']
       .map(function(v){return '"'+(v||'').toString().replace(/"/g,'""')+'"';}).join(',');
   });
   var a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob(['\uFEFF'+[header.join(',')].concat(rows).join('\n')],{type:'text/csv;charset=utf-8'}));
-  a.download='아트라이프다솜_임팩트기록.csv';
-  a.click();
+  a.href=URL.createObjectURL(new Blob(['\uFEFF'+[h.join(',')].concat(rows).join('\n')],{type:'text/csv;charset=utf-8'}));
+  a.download='아트라이프다솜_임팩트기록.csv'; a.click();
 }
 
-function esc(s){return (s||'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function esc(s){return(s||'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function showToast(msg,err){
   var t=document.getElementById('toast');
-  t.textContent=msg;
-  t.style.background=err?'#ef4444':'#4a7c59';
-  t.style.display='block';
-  setTimeout(function(){t.style.display='none';},3200);
+  t.textContent=msg; t.style.background=err?'#ef4444':'#4a7c59';
+  t.style.display='block'; setTimeout(function(){t.style.display='none';},3200);
 }
 </script>
 </body>
