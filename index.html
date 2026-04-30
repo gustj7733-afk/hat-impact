@@ -321,8 +321,8 @@ function renderRecords() {
   var sessions=filtered.reduce(function(a,r){return a+(+r.sessionNo||0);},0);
   var mins=filtered.reduce(function(a,r){return a+(+r.totalMin||0);},0);
   var ppl=filtered.reduce(function(a,r){return a+(+r.participants||0);},0);
-  document.getElementById('t-sessions').textContent=sessions+'회기';
-  document.getElementById('t-hours').textContent=Math.round(mins/60)+'시간';
+  document.getElementById('t-sessions').textContent=sessions.toLocaleString()+'회기';
+  document.getElementById('t-hours').textContent=Math.round(mins/60).toLocaleString()+'시간';
   document.getElementById('t-ppl').textContent=ppl.toLocaleString()+'명';
 
   if(filtered.length===0){
@@ -351,9 +351,9 @@ function renderDashboard() {
   var mins=filtered.reduce(function(a,r){return a+(+r.totalMin||0);},0);
   var ppl=filtered.reduce(function(a,r){return a+(+r.participants||0);},0);
   document.getElementById('k-count').innerHTML=filtered.length+'<span class="kpi-unit">건</span>';
-  document.getElementById('k-sessions').innerHTML=sessions+'<span class="kpi-unit">회기</span>';
+  document.getElementById('k-sessions').innerHTML=sessions.toLocaleString()+'<span class="kpi-unit">회기</span>';
   document.getElementById('k-ppl').innerHTML=ppl.toLocaleString()+'<span class="kpi-unit">명</span>';
-  document.getElementById('k-hours').innerHTML=Math.round(mins/60)+'<span class="kpi-unit">시간</span>';
+  document.getElementById('k-hours').innerHTML=Math.round(mins/60).toLocaleString()+'<span class="kpi-unit">시간</span>';
 
   var byTarget={};
   filtered.forEach(function(r){
